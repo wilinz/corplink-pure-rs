@@ -1,5 +1,5 @@
 //! Pure-Rust CorpLink/feilian WireGuard-over-TCP userspace tunnel.
-//! boringtun (WG crypto, CorpLink IDENTIFIER) + smoltcp (userspace TCP/IP) + corplink TCP transport.
+//! boringtun (WG crypto) + smoltcp (userspace TCP/IP) + corplink TCP transport.
 //! Exposes `Tunnel::connect(host_ip, port) -> TunnelStream` (AsyncRead+AsyncWrite).
 use anyhow::{bail, Context, Result};
 use base64::Engine;
@@ -19,6 +19,9 @@ use tokio::sync::{mpsc, oneshot};
 mod device;
 pub mod socks5;
 use device::VirtDevice;
+
+/// CorpLink/feilian replaces WireGuard's stock Noise handshake identifier.
+const CORPLINK_HANDSHAKE_IDENTIFIER: &[u8] = b"CorpLink v1 vpn@feilian-----------";
 
 #[derive(serde::Deserialize, Clone)]
 pub struct WgConf {
@@ -149,7 +152,15 @@ async fn run_tunnel(conf: WgConf, mut cmd_rx: mpsc::Receiver<Cmd>, ready: onesho
 
     let sp = x25519_dalek::StaticSecret::from(priv_k);
     let pp = x25519_dalek::PublicKey::from(peer_k);
-    let mut tunn = Tunn::new(sp, pp, None, Some(10), 0, None);
+    let mut tunn = Tunn::new_with_identifier(
+        sp,
+        pp,
+        None,
+        Some(10),
+        0,
+        None,
+        Some(CORPLINK_HANDSHAKE_IDENTIFIER),
+    );
 
     let tcp = TcpStream::connect(&conf.peer_address).await.context("connect wg endpoint")?;
     let (mut rd, mut wr) = tcp.into_split();

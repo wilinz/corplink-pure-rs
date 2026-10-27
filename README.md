@@ -41,8 +41,10 @@ Two protocol details make CorpLink differ from stock WireGuard, both handled her
    prefix per packet (instead of UDP).
 2. **Handshake identifier**: the Noise `IDENTIFIER` constant is
    `"CorpLink v1 vpn@feilian-----------"` instead of the stock WireGuard one.
-   The fork at [wilinz/boringtun](https://github.com/wilinz/boringtun) recomputes
-   `INITIAL_CHAIN_HASH` accordingly (one commit on top of upstream 0.7.1).
+   `tunnel/` passes it to the fork at
+   [wilinz/boringtun](https://github.com/wilinz/boringtun), which makes the
+   identifier caller-configurable (`Tunn::new_with_identifier`); the fork is one
+   commit on top of upstream 0.7.1.
 
 ## Quick start (self-contained client)
 
@@ -133,16 +135,16 @@ docker pull ghcr.io/wilinz/corplink-pure-rs:latest
 ## Keeping up with upstream boringtun
 
 `tunnel/Cargo.toml` pins [wilinz/boringtun](https://github.com/wilinz/boringtun)
-at tag `corplink-0.7.1`. The fork's `corplink` branch is upstream tag
-`boringtun-0.7.1` plus one commit (the `INITIAL_CHAIN_HASH` swap). To move to a
-newer upstream release:
+at tag `corplink-0.7.1.1`. The fork's `corplink` branch is upstream tag
+`boringtun-0.7.1` plus one commit (a caller-configurable handshake identifier,
+used here for CorpLink's). To move to a newer upstream release:
 
 ```bash
 git clone https://github.com/wilinz/boringtun && cd boringtun
 git remote add upstream https://github.com/cloudflare/boringtun
 git fetch upstream --tags
 git rebase boringtun-<new-version>
-# verify INITIAL_CHAIN_HASH = BLAKE2s-256(INITIAL_CHAIN_KEY || "CorpLink v1 vpn@feilian-----------")
+# check that Tunn::new_with_identifier and NoiseParams still thread the identifier
 git tag corplink-<new-version>
 git push origin corplink corplink-<new-version>
 ```
@@ -153,4 +155,4 @@ Then bump the tag in `tunnel/Cargo.toml` and run `cargo update -p boringtun`.
 
 MIT (this crate). `boringtun` is BSD-3-Clause, © Cloudflare, Inc.; it is used
 from [wilinz/boringtun](https://github.com/wilinz/boringtun), a fork with a
-single commit changing the handshake identifier.
+single commit making the handshake identifier caller-configurable.

@@ -11,9 +11,9 @@ name = "corplink_tunnel"
 path = "src/lib.rs"
 
 [dependencies]
-# Fork of cloudflare/boringtun with the CorpLink/feilian WireGuard IDENTIFIER.
-# Branch `corplink` = upstream tag boringtun-0.7.1 + one commit.
-boringtun = { git = "https://github.com/wilinz/boringtun", tag = "corplink-0.7.1" }
+# Fork of cloudflare/boringtun that makes the Noise handshake identifier
+# caller-configurable. Branch `corplink` = upstream tag boringtun-0.7.1 + one commit.
+boringtun = { git = "https://github.com/wilinz/boringtun", tag = "corplink-0.7.1.1" }
 x25519-dalek = "2"
 smoltcp = { version = "0.12", default-features = false, features = ["std", "medium-ip", "proto-ipv4", "socket-tcp", "socket-udp"] }
 tokio = { version = "1", features = ["full"] }
