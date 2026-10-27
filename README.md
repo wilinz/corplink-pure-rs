@@ -41,8 +41,8 @@ Two protocol details make CorpLink differ from stock WireGuard, both handled her
    prefix per packet (instead of UDP).
 2. **Handshake identifier**: the Noise `IDENTIFIER` constant is
    `"CorpLink v1 vpn@feilian-----------"` instead of the stock WireGuard one.
-   The vendored boringtun in `vendor/boringtun` recomputes `INITIAL_CHAIN_HASH`
-   accordingly (see `vendor/boringtun/MODIFICATIONS.md`).
+   The fork at [wilinz/boringtun](https://github.com/wilinz/boringtun) recomputes
+   `INITIAL_CHAIN_HASH` accordingly (one commit on top of upstream 0.7.1).
 
 ## Quick start (self-contained client)
 
@@ -110,7 +110,43 @@ cargo run --release --bin socks5d -- wgconf.json 127.0.0.1:1080
 cargo run --release --bin test-conn -- wgconf.json <ip> <port> <sni> [path]
 ```
 
+## Docker
+
+```bash
+docker build -t corplink-pure-rs .
+docker run --rm -p 1080:1080 -v "$PWD/data:/data" corplink-pure-rs
+```
+
+The container runs `corplink-client /data/config.json`; `config.json` and the
+`corplink_cookies.json` the client writes next to it live in the mounted
+directory. Inside the container set `socks5_listen` to `0.0.0.0:1080` if you
+want to publish the port. A different config path can be passed as the command:
+`docker run … corplink-pure-rs /data/other.json`.
+
+CI publishes `nrt.vultrcr.com/wilinz/corplink-pure-rs:latest` on every push to
+`main` (and `v*` tags / manual runs).
+
+## Keeping up with upstream boringtun
+
+`tunnel/Cargo.toml` pins [wilinz/boringtun](https://github.com/wilinz/boringtun)
+at tag `corplink-0.7.1`. The fork's `corplink` branch is upstream tag
+`boringtun-0.7.1` plus one commit (the `INITIAL_CHAIN_HASH` swap). To move to a
+newer upstream release:
+
+```bash
+git clone https://github.com/wilinz/boringtun && cd boringtun
+git remote add upstream https://github.com/cloudflare/boringtun
+git fetch upstream --tags
+git rebase boringtun-<new-version>
+# verify INITIAL_CHAIN_HASH = BLAKE2s-256(INITIAL_CHAIN_KEY || "CorpLink v1 vpn@feilian-----------")
+git tag corplink-<new-version>
+git push origin corplink corplink-<new-version>
+```
+
+Then bump the tag in `tunnel/Cargo.toml` and run `cargo update -p boringtun`.
+
 ## License
 
-MIT (this crate). The vendored `boringtun` is BSD-3-Clause, © Cloudflare, Inc.;
-see `vendor/boringtun/LICENSE` and `vendor/boringtun/MODIFICATIONS.md`.
+MIT (this crate). `boringtun` is BSD-3-Clause, © Cloudflare, Inc.; it is used
+from [wilinz/boringtun](https://github.com/wilinz/boringtun), a fork with a
+single commit changing the handshake identifier.
