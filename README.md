@@ -123,8 +123,12 @@ directory. Inside the container set `socks5_listen` to `0.0.0.0:1080` if you
 want to publish the port. A different config path can be passed as the command:
 `docker run … corplink-pure-rs /data/other.json`.
 
-CI publishes `nrt.vultrcr.com/wilinz/corplink-pure-rs:latest` on every push to
-`main` (and `v*` tags / manual runs).
+CI publishes `ghcr.io/wilinz/corplink-pure-rs:latest` on every push to `main`
+(and `v*` tags / manual runs). Pull it with:
+
+```bash
+docker pull ghcr.io/wilinz/corplink-pure-rs:latest
+```
 
 ## Keeping up with upstream boringtun
 

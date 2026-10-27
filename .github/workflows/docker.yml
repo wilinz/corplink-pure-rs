@@ -7,13 +7,14 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE: nrt.vultrcr.com/wilinz/corplink-pure-rs
+  IMAGE: ghcr.io/wilinz/corplink-pure-rs
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      packages: write
 
     steps:
       - name: Checkout
@@ -22,12 +23,12 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to registry
+      - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
-          registry: nrt.vultrcr.com
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Docker metadata
         id: meta
