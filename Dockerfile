@@ -7,6 +7,9 @@ WORKDIR /src
 # git: fetch the boringtun fork; openssl-dev/pkgconf: openssl-sys (native-tls);
 # build-base: ring's C/asm build scripts
 RUN apk add --no-cache build-base git pkgconf openssl-dev
+# Alpine ships shared OpenSSL only; musl's default fully-static link mode
+# would look for libssl.a. Link the runtime dynamically instead.
+ENV RUSTFLAGS="-C target-feature=-crt-static"
 COPY . .
 RUN cargo build --release -p corplink-client --bin corplink-client
 
