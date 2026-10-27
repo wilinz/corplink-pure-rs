@@ -1,4 +1,4 @@
-# corplink-tunnel-rs
+# corplink-pure-rs
 
 A **fully self-contained, pure-Rust** CorpLink / feilian client. No Go, no
 `libwg`, no CGO, no TUN device, no root — a single `cargo build`.

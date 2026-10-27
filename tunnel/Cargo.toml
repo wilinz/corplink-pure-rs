@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 license = "MIT"
 description = "Pure-Rust userspace WireGuard-over-TCP tunnel for the CorpLink/feilian variant, with a connect() API and a SOCKS5 server"
-repository = "https://github.com/wilinz/corplink-tunnel-rs"
+repository = "https://github.com/wilinz/corplink-pure-rs"
 
 [lib]
 name = "corplink_tunnel"
